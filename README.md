@@ -1,1 +1,1 @@
-# CTFs
+# CTFs related scripts for me
