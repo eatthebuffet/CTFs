@@ -1,3 +1,8 @@
+# This script will scan for LFI and print out any results using the provided file. 
+# It will print out two files, one with all of the results and one with the errors in your current working directory.
+# It will also print out what position it is at.
+
+
 import requests
 import zipfile
 import io
