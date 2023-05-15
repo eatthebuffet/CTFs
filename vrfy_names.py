@@ -18,7 +18,7 @@ if os.path.isfile(errors_path):
     os.remove(errors_path)
 
 # IP address of the SMTP server
-SMTP_SERVER = '10.129.123.246'
+SMTP_SERVER = 'IP'
 
 # Port number to connect
 SMTP_PORT = 25
