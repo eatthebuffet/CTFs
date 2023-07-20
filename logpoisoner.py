@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-#Taken and modified from https://github.com/nickpupp0/LogPoisoner/blob/main/logpoisoner.py
+# Taken and modified from https://github.com/nickpupp0/LogPoisoner/blob/main/logpoisoner.py
+# run via python3 logpoisoner.py and enter the logpoisoner url when requested.
 import requests
                                                                          
 print("                                                       /%")                   
