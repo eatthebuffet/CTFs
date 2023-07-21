@@ -43,6 +43,7 @@ fullcmd=f"&cmd={commandPath}"
 
 print("[+] Poisoning...")
 if response.status_code != 200:
+    print(f"[-] Response code was: {response.status_code}\n")
     print("[-] Response did not equal 200. Quitting...")
     exit()
 
